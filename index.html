@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Core Text Engine</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success-color: #10b981;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --suggest-hover: rgba(99, 102, 241, 0.15);
+            --badge-bg: rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-card {
+            width: 100%;
+            max-width: 720px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            padding: 40px;
+        }
+
+        header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .input-box-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 16px 22px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 18px;
+            width: 100%;
+            font-weight: 400;
+        }
+
+        input[type="text"]::placeholder {
+            color: #475569;
+        }
+
+        /* Fixed Height Container to stop jumpy UI elements */
+        .suggestions-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            height: 260px;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .suggestions-header {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        #suggestionsList {
+            height: calc(100% - 38px);
+            overflow-y: auto;
+        }
+
+        .suggestion-item {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--suggest-hover);
+        }
+
+        .suggestion-word {
+            font-size: 16px;
+            color: var(--text-main);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .suggestion-item:hover .suggestion-word {
+            color: #fff;
+            transform: translateX(4px);
+            transition: transform 0.2s ease;
+        }
+
+        .freq-badge {
+            font-size: 11px;
+            background: var(--badge-bg);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: 'SF Mono', Monaco, monospace;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .suggestion-item:hover .freq-badge {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        #suggestionsList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #suggestionsList::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #suggestionsList::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        footer {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-pill::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-card">
+        <header>
+            <h1>Predictive Text Engine</h1>
+            <p>Adaptive Self-Learning WebAssembly Core</p>
+        </header>
+
+        <div class="input-box-container">
+            <div class="input-wrapper">
+                <input type="text" id="textInput" placeholder="Type something or a typo (e.g., compwter)..." autofocus
+                    autocomplete="off">
+            </div>
+        </div>
+
+        <div class="suggestions-card" id="suggestionsContainer">
+            <div class="suggestions-header">Predictions & Smart Corrections</div>
+            <div id="suggestionsList"></div>
+        </div>
+
+        <footer>
+            <div class="status-pill">Active Learning Mode</div>
+            <div style="padding-top: 4px;">Powered by C++ WASM</div>
+        </footer>
+    </div>
+
+    <script src="engine.js"></script>
+    <script>
+        let querySuggestionsWASM = null;
+        let incrementFrequencyWASM = null;
+
+        Module.onRuntimeInitialized = function () {
+            console.log("WASM Core Interface Operational.");
+            querySuggestionsWASM = Module.cwrap('query_suggestions', 'string', ['string']);
+            incrementFrequencyWASM = Module.cwrap('increment_word_frequency', null, ['string']);
+            Module.ccall('init_dictionary', null, [], []);
+        };
+
+        const textInput = document.getElementById('textInput');
+        const container = document.getElementById('suggestionsContainer');
+        const list = document.getElementById('suggestionsList');
+
+        let topSuggestionToken = "";
+
+        textInput.addEventListener('input', (e) => {
+            const fullText = e.target.value;
+
+            if (!fullText.trim() || !querySuggestionsWASM) {
+                container.style.visibility = 'hidden';
+                list.innerHTML = '';
+                topSuggestionToken = "";
+                return;
+            }
+
+            const wordsArray = fullText.split(/\s+/);
+            const activeToken = wordsArray[wordsArray.length - 1];
+
+            if (!activeToken) {
+                container.style.visibility = 'hidden';
+                topSuggestionToken = "";
+                return;
+            }
+
+            const rawResponseStr = querySuggestionsWASM(activeToken);
+
+            if (!rawResponseStr || rawResponseStr === "") {
+                container.style.visibility = 'hidden';
+                list.innerHTML = '';
+                topSuggestionToken = "";
+                return;
+            }
+
+            const items = rawResponseStr.split('|');
+            list.innerHTML = '';
+
+            if (items.length > 0 && items[0].trim() !== "") {
+                topSuggestionToken = items[0].trim();
+            } else {
+                topSuggestionToken = "";
+            }
+
+            items.forEach((term, index) => {
+                if (term.trim() !== "") {
+                    const row = document.createElement('div');
+                    row.className = 'suggestion-item';
+
+                    if (index === 0) {
+                        row.style.borderLeft = '3px solid var(--accent-color)';
+                        row.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }
+
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'suggestion-word';
+                    wordSpan.textContent = term;
+
+                    const badgeSpan = document.createElement('span');
+                    badgeSpan.className = 'freq-badge';
+                    badgeSpan.textContent = index === 0 ? '⇥ press tab' : 'score boosted';
+
+                    row.appendChild(wordSpan);
+                    row.appendChild(badgeSpan);
+
+                    row.onclick = () => {
+                        executeWordCompletion(term);
+                    };
+                    list.appendChild(row);
+                }
+            });
+
+            container.style.visibility = list.children.length > 0 ? 'visible' : 'hidden';
+        });
+
+        function executeWordCompletion(wordToInsert) {
+            if (!wordToInsert) return;
+
+            if (incrementFrequencyWASM) {
+                incrementFrequencyWASM(wordToInsert);
+            }
+
+            const fullText = textInput.value;
+            const wordsArray = fullText.split(/\s+/);
+            wordsArray[wordsArray.length - 1] = wordToInsert;
+
+            textInput.value = wordsArray.join(' ') + ' ';
+            container.style.visibility = 'hidden';
+            topSuggestionToken = "";
+            textInput.focus();
+        }
+
+        textInput.addEventListener('keydown', (e) => {
+            if (container.style.visibility === 'visible' && topSuggestionToken !== "") {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    executeWordCompletion(topSuggestionToken);
+                }
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.app-card')) {
+                container.style.visibility = 'hidden';
+            }
+        });
+    </script>
+</body>
+
+</html>
