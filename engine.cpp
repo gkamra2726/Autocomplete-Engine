@@ -91,7 +91,6 @@ public:
         curr->isEndOfWord = true;
         curr->frequency = max(curr->frequency, freq);
 
-        // Check if already exists in baseline corpus to prevent redundant tracking pointers
         for (auto &entry : allWordsCorpus)
         {
             if (entry.first == word)
@@ -103,22 +102,19 @@ public:
         allWordsCorpus.push_back({word, freq});
     }
 
-    // Dynamic self-learning engine update method
     void reinforceFrequency(string word)
     {
         TrieNode *curr = root;
         for (char ch : word)
         {
             if (curr->children.find(ch) == curr->children.end())
-                return; // Word mismatch safety fallback
+                return;
             curr = curr->children[ch];
         }
         if (curr->isEndOfWord)
         {
-            // Boost frequency scaling metrics by a significant coefficient step
-            curr->frequency += 10000000;
+            curr->frequency += 15000000;
 
-            // Sync cross-reference values inside search loop indices
             for (auto &entry : allWordsCorpus)
             {
                 if (entry.first == word)
@@ -182,7 +178,8 @@ public:
         int limit = min(5, (int)matchedResults.size());
         for (int i = 0; i < limit; i++)
         {
-            serializedOutput += matchedResults[i].first;
+            // FIXED: Changed .frequency to .second to correctly pull the long long value from pair struct
+            serializedOutput += matchedResults[i].first + ":" + to_string(matchedResults[i].second);
             if (i < limit - 1)
                 serializedOutput += "|";
         }
@@ -227,7 +224,6 @@ extern "C"
         return outputCache.c_str();
     }
 
-    // Export link layer to register clicks from JavaScript runtime context
     EMSCRIPTEN_KEEPALIVE
     void increment_word_frequency(const char *word)
     {
