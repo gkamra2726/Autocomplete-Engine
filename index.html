@@ -10,7 +10,6 @@
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             --panel-bg: rgba(30, 41, 59, 0.7);
             --accent-color: #6366f1;
-            --accent-hover: #4f46e5;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --success-color: #10b981;
@@ -23,7 +22,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
@@ -81,12 +80,11 @@
             border-radius: 16px;
             padding: 16px 22px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .input-wrapper:focus-within {
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
             background: rgba(15, 23, 42, 0.8);
         }
 
@@ -98,14 +96,12 @@
             color: var(--text-main);
             font-size: 18px;
             width: 100%;
-            font-weight: 400;
         }
 
         input[type="text"]::placeholder {
             color: #475569;
         }
 
-        /* Fixed Height Container to stop jumpy UI elements */
         .suggestions-card {
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid var(--border-color);
@@ -113,7 +109,6 @@
             overflow: hidden;
             height: 260px;
             visibility: hidden;
-            transition: all 0.3s ease;
         }
 
         .suggestions-header {
@@ -154,15 +149,12 @@
             font-size: 16px;
             color: var(--text-main);
             font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
-        .suggestion-item:hover .suggestion-word {
-            color: #fff;
-            transform: translateX(4px);
-            transition: transform 0.2s ease;
+        .badge-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .freq-badge {
@@ -171,27 +163,16 @@
             color: var(--text-muted);
             padding: 4px 10px;
             border-radius: 20px;
-            font-family: 'SF Mono', Monaco, monospace;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: monospace;
         }
 
-        .suggestion-item:hover .freq-badge {
-            background: var(--accent-color);
-            color: #fff;
-            border-color: transparent;
-        }
-
-        #suggestionsList::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #suggestionsList::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        #suggestionsList::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+        .tab-badge {
+            font-size: 11px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
         }
 
         footer {
@@ -200,7 +181,6 @@
             justify-content: space-between;
             font-size: 12px;
             color: var(--text-muted);
-            padding: 0 4px;
         }
 
         .status-pill {
@@ -211,7 +191,6 @@
             color: var(--success-color);
             padding: 4px 12px;
             border-radius: 20px;
-            font-weight: 500;
         }
 
         .status-pill::before {
@@ -229,24 +208,24 @@
     <div class="app-card">
         <header>
             <h1>Predictive Text Engine</h1>
-            <p>Adaptive Self-Learning WebAssembly Core</p>
+            <p>Adaptive Robust Self-Learning Core</p>
         </header>
 
         <div class="input-box-container">
             <div class="input-wrapper">
-                <input type="text" id="textInput" placeholder="Type something or a typo (e.g., compwter)..." autofocus
+                <input type="text" id="textInput" placeholder="Try: 'C' -> 'Co' -> 'COM'..." autofocus
                     autocomplete="off">
             </div>
         </div>
 
         <div class="suggestions-card" id="suggestionsContainer">
-            <div class="suggestions-header">Predictions & Smart Corrections</div>
+            <div class="suggestions-header">Predictions & Metrics</div>
             <div id="suggestionsList"></div>
         </div>
 
         <footer>
-            <div class="status-pill">Active Learning Mode</div>
-            <div style="padding-top: 4px;">Powered by C++ WASM</div>
+            <div class="status-pill">System Operational</div>
+            <div style="padding-top: 4px;">C++ WebAssembly Module</div>
         </footer>
     </div>
 
@@ -256,7 +235,6 @@
         let incrementFrequencyWASM = null;
 
         Module.onRuntimeInitialized = function () {
-            console.log("WASM Core Interface Operational.");
             querySuggestionsWASM = Module.cwrap('query_suggestions', 'string', ['string']);
             incrementFrequencyWASM = Module.cwrap('increment_word_frequency', null, ['string']);
             Module.ccall('init_dictionary', null, [], []);
@@ -268,26 +246,65 @@
 
         let topSuggestionToken = "";
 
+        function formatScore(score) {
+            if (score >= 1000000) return (score / 1000000).toFixed(1) + 'M';
+            if (score >= 1000) return (score / 1000).toFixed(1) + 'K';
+            return score;
+        }
+
+        // Advanced Casing Matrix Engine
+        function applySmartCasing(rawWord, userToken) {
+            if (!userToken) return rawWord;
+
+            // Step 1: Count how many capital letters the user has currently typed in this token
+            let capitalCount = 0;
+            for (let i = 0; i < userToken.length; i++) {
+                const char = userToken[i];
+                if (char === char.toUpperCase() && char !== char.toLowerCase()) {
+                    capitalCount++;
+                }
+            }
+
+            // Condition A: If there's MORE THAN ONE capital letter typed (e.g., "CO", "COM", "COm") -> Force ALL CAPS
+            if (capitalCount > 1) {
+                return rawWord.toUpperCase();
+            }
+
+            // Condition B: Exactly one capital letter AND it's the very first character -> Title Case
+            if (capitalCount === 1 && userToken[0] === userToken[0].toUpperCase() && userToken[0] !== userToken[0].toLowerCase()) {
+                return rawWord.charAt(0).toUpperCase() + rawWord.slice(1).toLowerCase();
+            }
+
+            // Condition C: Default fallback to lowercase
+            return rawWord.toLowerCase();
+        }
+
         textInput.addEventListener('input', (e) => {
             const fullText = e.target.value;
 
-            if (!fullText.trim() || !querySuggestionsWASM) {
+            if (!fullText) {
                 container.style.visibility = 'hidden';
                 list.innerHTML = '';
                 topSuggestionToken = "";
                 return;
             }
 
-            const wordsArray = fullText.split(/\s+/);
-            const activeToken = wordsArray[wordsArray.length - 1];
-
-            if (!activeToken) {
+            const wordsArray = fullText.match(/\S+/g) || [];
+            if (wordsArray.length === 0 || fullText.endsWith(' ')) {
                 container.style.visibility = 'hidden';
                 topSuggestionToken = "";
                 return;
             }
 
-            const rawResponseStr = querySuggestionsWASM(activeToken);
+            const rawActiveToken = wordsArray[wordsArray.length - 1];
+            const cleanSearchToken = rawActiveToken.toLowerCase();
+
+            if (!cleanSearchToken || !querySuggestionsWASM) {
+                container.style.visibility = 'hidden';
+                return;
+            }
+
+            const rawResponseStr = querySuggestionsWASM(cleanSearchToken);
 
             if (!rawResponseStr || rawResponseStr === "") {
                 container.style.visibility = 'hidden';
@@ -299,35 +316,48 @@
             const items = rawResponseStr.split('|');
             list.innerHTML = '';
 
-            if (items.length > 0 && items[0].trim() !== "") {
-                topSuggestionToken = items[0].trim();
-            } else {
-                topSuggestionToken = "";
-            }
+            items.forEach((item, index) => {
+                const parts = item.split(':');
+                if (parts.length === 2) {
+                    const baselineTerm = parts[0];
+                    const score = parseInt(parts[1]);
 
-            items.forEach((term, index) => {
-                if (term.trim() !== "") {
+                    const casedTerm = applySmartCasing(baselineTerm, rawActiveToken);
+
+                    if (index === 0) topSuggestionToken = casedTerm;
+
                     const row = document.createElement('div');
                     row.className = 'suggestion-item';
 
                     if (index === 0) {
-                        row.style.borderLeft = '3px solid var(--accent-color)';
+                        row.style.borderLeft = '4px solid var(--accent-color)';
                         row.style.background = 'rgba(255, 255, 255, 0.02)';
                     }
 
                     const wordSpan = document.createElement('span');
                     wordSpan.className = 'suggestion-word';
-                    wordSpan.textContent = term;
+                    wordSpan.textContent = casedTerm;
 
-                    const badgeSpan = document.createElement('span');
-                    badgeSpan.className = 'freq-badge';
-                    badgeSpan.textContent = index === 0 ? '⇥ press tab' : 'score boosted';
+                    const badgeContainer = document.createElement('div');
+                    badgeContainer.className = 'badge-container';
+
+                    const scoreBadge = document.createElement('span');
+                    scoreBadge.className = 'freq-badge';
+                    scoreBadge.textContent = `Score: ${formatScore(score)}`;
+                    badgeContainer.appendChild(scoreBadge);
+
+                    if (index === 0) {
+                        const tabBadge = document.createElement('span');
+                        tabBadge.className = 'tab-badge';
+                        tabBadge.textContent = '⇥ Tab';
+                        badgeContainer.appendChild(tabBadge);
+                    }
 
                     row.appendChild(wordSpan);
-                    row.appendChild(badgeSpan);
+                    row.appendChild(badgeContainer);
 
                     row.onclick = () => {
-                        executeWordCompletion(term);
+                        executeWordCompletion(casedTerm);
                     };
                     list.appendChild(row);
                 }
@@ -340,14 +370,18 @@
             if (!wordToInsert) return;
 
             if (incrementFrequencyWASM) {
-                incrementFrequencyWASM(wordToInsert);
+                incrementFrequencyWASM(wordToInsert.toLowerCase());
             }
 
             const fullText = textInput.value;
-            const wordsArray = fullText.split(/\s+/);
-            wordsArray[wordsArray.length - 1] = wordToInsert;
+            const lastSpaceIndex = fullText.trimEnd().lastIndexOf(' ');
 
-            textInput.value = wordsArray.join(' ') + ' ';
+            let baseText = "";
+            if (lastSpaceIndex !== -1) {
+                baseText = fullText.substring(0, lastSpaceIndex + 1);
+            }
+
+            textInput.value = baseText + wordToInsert + ' ';
             container.style.visibility = 'hidden';
             topSuggestionToken = "";
             textInput.focus();
