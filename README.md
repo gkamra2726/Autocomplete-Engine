@@ -21,7 +21,6 @@ The predictive engine is optimized to utilize the comprehensive Wikipedia langua
 1. Create a `data/` directory inside your project root folder.
 2. Download the exact `wiki.train.tokens` dataset from Kaggle or the direct mirror link:
    - 🌐 Kaggle Link: https://www.kaggle.com/datasets/rohitgr/wikitext
-   - 📥 Direct Zip Mirror: https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-2-raw-v1.zip
 3. Extract the downloaded dataset archive and place the largest file named `wiki.train.tokens` directly into your `data/` folder:
 
 ---
