@@ -21,7 +21,8 @@ public:
     // Given the full text typed so far, returns top-k suggestions.
     // Decides internally whether to autocomplete the current word
     // or predict the next word, based on whether `input` ends in a space.
-    std::vector<std::string> predict(const std::string& input) const;
+    // predictor.hpp ke andar line number 24 ke aas-paas:
+std::vector<std::string> predict(const std::string& input); // <-- End se 'const' hata diya
 
     // Stats for display
     int vocabularySize() const;
