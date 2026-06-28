@@ -46,3 +46,15 @@ The `make clean` command removes previously generated build files, and `make run
 - **TAB Key** — Instantly applies the primary high-priority recommendation card.
 - **Left Mouse Click** — Select any contextual recommendation capsule directly using your mouse.
 - **ENTER Key** — Completely clears the workspace buffer console stream to reset parameters.
+
+
+## Running the Web Version
+
+```bash
+make clean
+make web
+./predict_web
+```
+
+The server will start locally. Open your browser and navigate to the URL printed in the terminal (typically `http://localhost:8080`).
+```

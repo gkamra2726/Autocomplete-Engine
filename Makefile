@@ -2,6 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -O2
 
 CORE_SRCS = trie.cpp ngram_trie.cpp tokenizer.cpp predictor.cpp
+WEB_SRCS = web_server.cpp $(CORE_SRCS)
 
 all: app test
 
@@ -29,3 +30,9 @@ gui: $(CORE_SRCS) gui_main.cpp
 
 run-gui: gui
 	./predictor_gui
+
+web: $(WEB_SRCS)
+	$(CXX) $(CXXFLAGS) $(WEB_SRCS) -o predictor_web
+
+run-web: web
+	./predictor_web

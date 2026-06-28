@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Core Engine Web Predictive UI</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(10, 18, 33, 0.82);
+      --panel-2: rgba(18, 28, 46, 0.92);
+      --text: #e8edf7;
+      --muted: #99a7bf;
+      --accent: #47c7ff;
+      --accent-2: #7c9cff;
+      --border: rgba(157, 179, 216, 0.18);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(71, 199, 255, 0.20), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(124, 156, 255, 0.18), transparent 24%),
+        linear-gradient(160deg, #050b14 0%, #0a1527 45%, #050b14 100%);
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 40px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      border-radius: 24px;
+    }
+
+    .masthead {
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .masthead::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -30% auto;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(71, 199, 255, 0.16), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(71, 199, 255, 0.10);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 4vw, 4.5rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+      max-width: 9ch;
+    }
+
+    .lede {
+      margin: 16px 0 0;
+      max-width: 58ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .stats {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 24px;
+    }
+
+    .stat {
+      padding: 16px;
+      background: rgba(12, 20, 36, 0.75);
+      border: 1px solid rgba(157, 179, 216, 0.12);
+      border-radius: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border: 1px solid rgba(157, 179, 216, 0.16);
+      border-radius: 18px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 16px 18px;
+      font: inherit;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: rgba(71, 199, 255, 0.5);
+      box-shadow: 0 0 0 4px rgba(71, 199, 255, 0.12);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0 18px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #07111f;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 52px;
+    }
+
+    .chip {
+      border: 1px solid rgba(157, 179, 216, 0.18);
+      background: rgba(15, 24, 40, 0.9);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(71, 199, 255, 0.5);
+      background: rgba(24, 38, 62, 0.95);
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 920px) {
+      .hero { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .masthead { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="card masthead">
+        <div class="eyebrow">Core Engine Web Mode</div>
+        <h1>Predict words in the browser.</h1>
+        <p class="lede">
+          A browser-based alternative to the desktop UI. Type any sentence, then use the live suggestions to complete the current word or predict the next one from the same trained predictor.
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <strong>Localhost</strong>
+            <span>Runs from a local C++ server on port 8080.</span>
+          </div>
+          <div class="stat">
+            <strong>Same model</strong>
+            <span>Uses the existing trie and n-gram predictor backend.</span>
+          </div>
+          <div class="stat">
+            <strong>No SFML</strong>
+            <span>Works even when the desktop SFML stack is missing.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <label for="input">Type here</label>
+        <textarea id="input" spellcheck="false" placeholder="Start typing a phrase..."></textarea>
+        <div class="toolbar">
+          <button class="button" id="clear">Clear</button>
+          <div class="hint">Press Space to switch into next-word prediction. Click a suggestion to insert it.</div>
+        </div>
+        <div class="suggestions" id="suggestions"></div>
+        <div class="footer-note" id="status">Connecting to local prediction service...</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const input = document.getElementById('input');
+    const suggestions = document.getElementById('suggestions');
+    const status = document.getElementById('status');
+    const clearButton = document.getElementById('clear');
+
+    let timer = null;
+
+    function renderSuggestions(items) {
+      suggestions.innerHTML = '';
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'hint';
+        empty.textContent = 'No suggestions yet.';
+        suggestions.appendChild(empty);
+        return;
+      }
+
+      for (const item of items) {
+        const button = document.createElement('button');
+        button.className = 'chip';
+        button.type = 'button';
+        button.textContent = item;
+        button.addEventListener('click', () => {
+          const prefix = input.value;
+          const trimmed = prefix.replace(/\s+$/, '');
+          const needsSpace = prefix.length > 0 && !/\s$/.test(prefix);
+          input.value = needsSpace ? `${trimmed} ${item} ` : `${prefix}${item} `;
+          input.focus();
+          queuePredict();
+        });
+        suggestions.appendChild(button);
+      }
+    }
+
+    async function predict() {
+      const query = encodeURIComponent(input.value);
+      status.textContent = 'Predicting...';
+
+      try {
+        const response = await fetch(`/api/suggest?q=${query}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        renderSuggestions(data.suggestions || []);
+        status.textContent = 'Connected to local predictor.';
+      } catch (error) {
+        renderSuggestions([]);
+        status.textContent = 'Prediction service unavailable. Make sure predictor_web is running.';
+      }
+    }
+
+    function queuePredict() {
+      clearTimeout(timer);
+      timer = setTimeout(predict, 150);
+    }
+
+    input.addEventListener('input', queuePredict);
+    clearButton.addEventListener('click', () => {
+      input.value = '';
+      input.focus();
+      queuePredict();
+    });
+
+    input.value = 'the quick';
+    queuePredict();
+  </script>
+</body>
+</html>
