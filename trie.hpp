@@ -46,6 +46,12 @@ public:
     std::vector<std::string> autocomplete(const std::string& prefix, int k) const;
 
     int totalWords;  // unique words inserted (for stats display)
+    // trie.hpp ke public section me ye add karo:
+void searchEditDistance(TrieNode* node, char ch, const std::string& word, 
+                        const std::vector<int>& previousRow, const std::string& target, 
+                        std::vector<std::pair<std::string, int>>& results, int maxCost) const;
+
+std::vector<std::string> autocompleteWithEditDistance(const std::string& word, int maxCost, int k) const;
 };
 
 #endif
